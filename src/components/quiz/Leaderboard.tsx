@@ -28,7 +28,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ players }) => {
       </div>
 
       <AnimatePresence mode="popLayout">
-        {sortedPlayers.slice(0, 10).map((player, index) => {
+        {sortedPlayers.slice(0, 50).map((player, index) => {
           const isTop3 = index < 3
           return (
             <motion.div
