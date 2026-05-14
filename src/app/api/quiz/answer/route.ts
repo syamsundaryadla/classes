@@ -47,9 +47,10 @@ export async function POST(req: Request) {
 
     player.hasAnsweredCurrent = true
 
-    // Check if everyone has answered
-    const allAnswered = quizStore.players.every(p => p.hasAnsweredCurrent)
-    if (allAnswered && quizStore.players.length > 0) {
+    // Auto-advance to leaderboard only if the timer has fully elapsed server-side.
+    // This means 50+ players can all still answer before time is up.
+    // The admin can also manually trigger leaderboard at any time.
+    if (timeElapsed >= timeLimitMs) {
       quizStore.status = 'leaderboard'
       quizStore.questionStartTime = null
     }
