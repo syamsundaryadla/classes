@@ -2,10 +2,10 @@
 
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronRight, Layout, Database, Sparkles, Shield, Rocket, X } from 'lucide-react'
+import { ChevronRight, Layout, Database, Sparkles, Shield, Rocket, X, Cpu } from 'lucide-react'
 import { usePresentationStore } from '@/lib/store'
 
-const sections = [
+const ragSections = [
   {
     title: "Introduction",
     icon: Layout,
@@ -63,8 +63,49 @@ const sections = [
   }
 ]
 
+const geminiSections = [
+  {
+    title: "Understanding LLM APIs",
+    icon: Cpu,
+    slides: [
+      { id: 0, title: "LLM APIs Masterclass" },
+      { id: 1, title: "What are LLMs?" },
+      { id: 2, title: "Tokens & Context Windows" },
+      { id: 3, title: "Prompt → Model Workflow" },
+      { id: 4, title: "How AI Apps Use APIs" },
+      { id: 5, title: "Common LLM Use Cases" },
+    ]
+  },
+  {
+    title: "Gemini API Basics",
+    icon: Sparkles,
+    slides: [
+      { id: 6, title: "Gemini Ecosystem Overview" },
+      { id: 7, title: "Gemini API Setup" },
+      { id: 8, title: "Gemini SDK Installation" },
+      { id: 9, title: "Basic Text Generation" },
+      { id: 10, title: "Multimodal Capabilities" },
+      { id: 11, title: "Gemini vs OpenAI" },
+      { id: 12, title: "Gemini Chatbot Example" },
+    ]
+  },
+  {
+    title: "Real-world Architecture",
+    icon: Layout,
+    slides: [
+      { id: 13, title: "Frontend → Backend Flow" },
+      { id: 14, title: "Role of FastAPI Backend" },
+      { id: 15, title: "Databases & Vector DBs" },
+      { id: 16, title: "Deployment Basics" },
+      { id: 17, title: "Production App Overview" },
+    ]
+  }
+]
+
 export const Sidebar = () => {
-  const { currentSlide, setSlide, isSidebarOpen, setSidebar } = usePresentationStore()
+  const { currentSlide, setSlide, isSidebarOpen, setSidebar, currentTopicId } = usePresentationStore()
+
+  const activeSections = currentTopicId === 'rag' ? ragSections : geminiSections
 
   return (
     <AnimatePresence>
@@ -92,7 +133,7 @@ export const Sidebar = () => {
           </div>
 
           <div className="flex-1 py-4 px-3 space-y-6">
-            {sections.map((section, idx) => (
+            {activeSections.map((section, idx) => (
               <div key={idx}>
                 <div className="flex items-center gap-2 px-3 mb-2 text-muted-foreground">
                   <section.icon className="h-4 w-4" />

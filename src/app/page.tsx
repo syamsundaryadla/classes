@@ -9,6 +9,9 @@ import { AgentSimulation } from '@/components/demos/AgentSimulation'
 import { MultiAgentSimulation } from '@/components/demos/MultiAgentSimulation'
 import { VectorEmbeddingVisualizer } from '@/components/demos/VectorEmbeddingVisualizer'
 import { PromptBuilder } from '@/components/demos/PromptBuilder'
+import { CurriculumIndex } from '@/components/presentation/CurriculumIndex'
+import { TokenCalculator } from '@/components/demos/TokenCalculator'
+import { AIChatBot } from '@/components/demos/AIChatBot'
 import { usePresentationStore } from '@/lib/store'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -56,15 +59,13 @@ import {
 } from 'lucide-react'
 
 export default function PresentationPage() {
-  const { setTotalSlides, currentSlide } = usePresentationStore()
+  const { setTotalSlides, currentSlide, viewMode, currentTopicId } = usePresentationStore()
   
-  const TOTAL_SLIDES = 25
-
   useEffect(() => {
-    setTotalSlides(TOTAL_SLIDES)
-  }, [setTotalSlides])
+    setTotalSlides(currentTopicId === 'rag' ? 25 : 18)
+  }, [currentTopicId, setTotalSlides])
 
-  const renderSlide = () => {
+  const renderRagSlide = () => {
     switch (currentSlide) {
       // PART 1 - INTRODUCTION
       case 0:
@@ -851,9 +852,590 @@ if (score < 4) {
     }
   }
 
+  const renderGeminiSlide = () => {
+    switch (currentSlide) {
+      // PART 1 - UNDERSTANDING LLM APIs
+      case 0:
+        return (
+          <Slide>
+            <div className="flex flex-col items-center justify-center text-center space-y-8 h-full">
+              <Badge variant="outline" className="px-4 py-1 text-primary border-primary/20 bg-primary/5 uppercase tracking-[0.2em] font-bold">
+                Module 2 Masterclass
+              </Badge>
+              <SlideTitle className="text-6xl md:text-8xl bg-clip-text text-transparent bg-gradient-to-b from-yellow-500 to-primary/50">
+                LLM APIs & GEMINI
+              </SlideTitle>
+              <SlideSubtitle className="max-w-2xl mx-auto">
+                Understanding Large Language Models, Tokens, Context Windows, and Building Real-World AI Applications with Gemini & FastAPI.
+              </SlideSubtitle>
+              <div className="flex gap-4 pt-8">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted border text-sm font-medium">
+                  <Cpu className="h-4 w-4 text-yellow-500" /> Token & Cost Estimation
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted border text-sm font-medium">
+                  <Bot className="h-4 w-4 text-primary" /> Live Streaming Demos
+                </div>
+              </div>
+            </div>
+          </Slide>
+        )
+      case 1:
+        return (
+          <Slide>
+            <SlideTitle>What are Large Language Models (LLMs)?</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-primary">Next-Token Prediction Engines</h3>
+                  <p className="text-xl text-muted-foreground">
+                    At their core, LLMs are massive neural networks trained on vast amounts of text data to predict the most likely next word (or token) given a sequence of preceding words.
+                  </p>
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-green-500 h-6 w-6 shrink-0" /> <span>Transformer Architecture (Attention Mechanism)</span></li>
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-green-500 h-6 w-6 shrink-0" /> <span>Billions of Parameters (Weights & Biases)</span></li>
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-green-500 h-6 w-6 shrink-0" /> <span>Emergent Reasoning & Few-Shot Learning</span></li>
+                  </ul>
+                </div>
+                <div className="p-8 bg-muted border rounded-3xl space-y-6 text-center">
+                  <BrainCircuit className="h-16 w-16 text-primary mx-auto animate-pulse" />
+                  <div className="text-lg font-bold">"The cat sat on the..."</div>
+                  <div className="flex justify-center gap-4">
+                    <div className="p-3 bg-primary text-primary-foreground font-bold rounded-xl shadow">mat (85%)</div>
+                    <div className="p-3 bg-card border rounded-xl">couch (10%)</div>
+                    <div className="p-3 bg-card border rounded-xl">floor (5%)</div>
+                  </div>
+                </div>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 2:
+        return (
+          <Slide>
+            <SlideTitle>Tokens and Context Windows</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center h-full">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-primary">The Currency of LLMs</h3>
+                  <p className="text-xl text-muted-foreground">
+                    LLMs do not read words; they read chunks of characters called <strong>Tokens</strong>. Roughly, 1 token ≈ 4 characters or 0.75 words.
+                  </p>
+                  <div className="p-4 bg-card border rounded-2xl space-y-2">
+                    <h4 className="font-bold text-yellow-500">Context Window</h4>
+                    <p className="text-sm text-muted-foreground">The maximum number of tokens an LLM can process in a single prompt (input + output). Gemini 1.5 Pro boasts a massive <strong>2 Million Token</strong> context window!</p>
+                  </div>
+                </div>
+                <TokenCalculator />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 3:
+        return (
+          <Slide>
+            <SlideTitle>Prompt → Model → Response Workflow</SlideTitle>
+            <SlideContent>
+              <div className="flex flex-col items-center justify-center h-full space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl items-center">
+                  <div className="p-8 bg-card border rounded-3xl space-y-4 text-center relative group">
+                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center mx-auto text-blue-500 font-bold">1</div>
+                    <h3 className="font-bold text-xl">Prompt Formulation</h3>
+                    <p className="text-xs text-muted-foreground">User designs the prompt with system instructions, context, and query.</p>
+                    <ArrowRight className="absolute -right-6 top-1/2 -translate-y-1/2 h-8 w-8 text-primary hidden md:block" />
+                  </div>
+                  <div className="p-8 bg-primary/10 border border-primary rounded-3xl space-y-4 text-center relative group shadow-lg shadow-primary/10">
+                    <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto font-bold">2</div>
+                    <h3 className="font-bold text-xl">Model Execution</h3>
+                    <p className="text-xs text-muted-foreground">LLM tokenizes input, processes attention layers, and streams tokens.</p>
+                    <ArrowRight className="absolute -right-6 top-1/2 -translate-y-1/2 h-8 w-8 text-primary hidden md:block" />
+                  </div>
+                  <div className="p-8 bg-card border rounded-3xl space-y-4 text-center relative group">
+                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center mx-auto text-green-500 font-bold">3</div>
+                    <h3 className="font-bold text-xl">Response Delivery</h3>
+                    <p className="text-xs text-muted-foreground">Client receives decoded text, parses JSON/markdown, and updates UI.</p>
+                  </div>
+                </div>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 4:
+        return (
+          <Slide>
+            <SlideTitle>How AI Applications Use APIs</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-primary">Decoupling AI Logic</h3>
+                  <p className="text-xl text-muted-foreground">
+                    Instead of hosting 70-billion parameter models locally (which requires expensive clusters of A100 GPUs), modern applications make REST or gRPC API calls to cloud providers.
+                  </p>
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-primary h-6 w-6 shrink-0" /> <span>Pay-per-token pricing model</span></li>
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-primary h-6 w-6 shrink-0" /> <span>Server-Sent Events (SSE) for streaming</span></li>
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-primary h-6 w-6 shrink-0" /> <span>Stateless API interactions</span></li>
+                  </ul>
+                </div>
+                <CodeBlock 
+                  language="typescript"
+                  code={`
+// Simple REST API call to an LLM provider
+const response = await fetch("https://api.provider.com/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": \`Bearer \${process.env.API_KEY}\`
+  },
+  body: JSON.stringify({
+    model: "gemini-1.5-flash",
+    messages: [{ role: "user", content: "Explain quantum computing" }],
+    stream: true
+  })
+});
+                  `}
+                />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 5:
+        return (
+          <Slide>
+            <SlideTitle>Common LLM Use Cases</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6 space-y-4">
+                    <MessageSquare className="h-8 w-8 text-blue-500" />
+                    <h3 className="font-bold text-lg">Customer Support Bots</h3>
+                    <p className="text-sm text-muted-foreground">Automating 80% of Tier-1 support queries with 24/7 instant, multilingual responses.</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6 space-y-4">
+                    <FileText className="h-8 w-8 text-orange-500" />
+                    <h3 className="font-bold text-lg">Content & Summarization</h3>
+                    <p className="text-sm text-muted-foreground">Condensing 50-page financial reports into 3 bullet points in seconds.</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6 space-y-4">
+                    <Code2 className="h-8 w-8 text-green-500" />
+                    <h3 className="font-bold text-lg">Code Generation & Copilots</h3>
+                    <p className="text-sm text-muted-foreground">Assisting developers with writing boilerplates, refactoring, and debugging.</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+
+      // PART 2 - GEMINI API BASICS
+      case 6:
+        return (
+          <Slide>
+            <SlideTitle>Gemini Ecosystem Overview</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch">
+                {[
+                  { name: "Gemini Ultra", desc: "Largest model for highly complex tasks, reasoning, and math.", badge: "Enterprise", color: "border-blue-500" },
+                  { name: "Gemini Pro", desc: "Best balance of performance and intelligence for general reasoning.", badge: "2M Context", color: "border-purple-500" },
+                  { name: "Gemini Flash", desc: "Lightweight, ultra-fast, and cost-effective for high-volume tasks.", badge: "Speed", color: "border-yellow-500" },
+                  { name: "Gemini Nano", desc: "Optimized for on-device execution (Pixel phones, Chrome browser).", badge: "Edge", color: "border-green-500" },
+                ].map((m, i) => (
+                  <Card key={i} className={`bg-card border-t-4 ${m.color} flex flex-col justify-between`}>
+                    <CardContent className="p-6 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-bold text-lg">{m.name}</h3>
+                        <Badge variant="secondary" className="text-[10px] font-bold uppercase">{m.badge}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{m.desc}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 7:
+        return (
+          <Slide>
+            <SlideTitle>Gemini API Setup & Authentication</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-primary">Google AI Studio</h3>
+                  <p className="text-xl text-muted-foreground">
+                    Getting started with Gemini is seamless. Developers can generate API keys directly inside Google AI Studio, explore prompt galleries, and test multimodal inputs.
+                  </p>
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-2xl space-y-2">
+                    <div className="flex items-center gap-2 text-yellow-500 font-bold text-sm">
+                      <ShieldAlert className="h-4 w-4" /> Secure API Key Storage
+                    </div>
+                    <p className="text-xs text-muted-foreground">Never hardcode your GEMINI_API_KEY inside client-side code (React/Next.js client components). Always use backend API routes or environment variables.</p>
+                  </div>
+                </div>
+                <CodeBlock 
+                  language="bash"
+                  code={`
+# 1. Generate API Key in Google AI Studio
+# 2. Store securely in your .env file
+
+GEMINI_API_KEY="AIzaSyD...your_api_key_here"
+                  `}
+                />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 8:
+        return (
+          <Slide>
+            <SlideTitle>Gemini SDK Installation & Setup</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                  <p className="text-xl text-muted-foreground">
+                    Google provides official SDKs for JavaScript/TypeScript, Python, Go, and Android. The @google/genai SDK provides an elegant, modern interface for all Gemini capabilities.
+                  </p>
+                  <CodeBlock 
+                    language="bash"
+                    code={`
+# Install the official Google Gen AI SDK
+npm install @google/genai
+                    `}
+                  />
+                </div>
+                <CodeBlock 
+                  language="typescript"
+                  code={`
+import { GoogleGenAI } from '@google/genai';
+
+// Initialize the SDK with your API key
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// Ready to make API calls!
+                  `}
+                />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 9:
+        return (
+          <Slide>
+            <SlideTitle>Basic Text Generation & Parameters</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center h-full">
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-card border"><span className="font-bold text-primary">Temperature (0.0 - 2.0):</span> Controls randomness. 0.0 is deterministic/factual; 1.0+ is creative.</div>
+                    <div className="p-4 rounded-xl bg-card border"><span className="font-bold text-primary">Top P / Top K:</span> Nucleus sampling parameters controlling candidate token selection.</div>
+                    <div className="p-4 rounded-xl bg-card border"><span className="font-bold text-primary">System Instructions:</span> Persona and guardrail constraints applied before the prompt.</div>
+                  </div>
+                </div>
+                <CodeBlock 
+                  language="typescript"
+                  code={`
+const response = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: 'Write a haiku about cloud computing.',
+  config: {
+    temperature: 0.7,
+    topP: 0.8,
+    topK: 40,
+    systemInstruction: 'You are a poetic AI engineer.'
+  }
+});
+
+console.log(response.text);
+                  `}
+                />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 10:
+        return (
+          <Slide>
+            <SlideTitle>Gemini Multimodal Capabilities</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-primary">Native Multimodality</h3>
+                  <p className="text-xl text-muted-foreground">
+                    Unlike earlier models that stitched separate vision and audio models together, Gemini was built natively multimodal from the ground up to reason across Text, Images, Audio, Video, and Code.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-2xl bg-card flex items-center gap-3 font-bold"><Palette className="text-primary h-5 w-5" /> Image Analysis</div>
+                    <div className="p-4 border rounded-2xl bg-card flex items-center gap-3 font-bold"><FileText className="text-orange-500 h-5 w-5" /> PDF & Documents</div>
+                    <div className="p-4 border rounded-2xl bg-card flex items-center gap-3 font-bold"><MonitorSmartphone className="text-green-500 h-5 w-5" /> Video Understanding</div>
+                    <div className="p-4 border rounded-2xl bg-card flex items-center gap-3 font-bold"><Binary className="text-purple-500 h-5 w-5" /> Audio & Speech</div>
+                  </div>
+                </div>
+                <CodeBlock 
+                  language="typescript"
+                  code={`
+// Analyzing an image alongside text
+const response = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: [
+    {
+      inlineData: {
+        data: 'base64_encoded_image_data_here',
+        mimeType: 'image/jpeg'
+      }
+    },
+    'Explain the architectural diagram in this image.'
+  ]
+});
+                  `}
+                />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 11:
+        return (
+          <Slide>
+            <SlideTitle>Gemini vs OpenAI Comparison</SlideTitle>
+            <SlideContent>
+              <div className="overflow-x-auto w-full max-w-5xl mx-auto border rounded-3xl bg-card/50 backdrop-blur shadow-2xl">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="p-4 font-bold text-sm uppercase">Feature</th>
+                      <th className="p-4 font-bold text-sm uppercase text-primary">Google Gemini (1.5 / 2.5)</th>
+                      <th className="p-4 font-bold text-sm uppercase text-muted-foreground">OpenAI (GPT-4o)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    <tr>
+                      <td className="p-4 font-bold text-sm">Context Window</td>
+                      <td className="p-4 text-sm font-mono text-primary font-bold">Up to 2,000,000 Tokens</td>
+                      <td className="p-4 text-sm font-mono text-muted-foreground">128,000 Tokens</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-bold text-sm">Multimodality</td>
+                      <td className="p-4 text-sm">Native (Text, Image, Audio, Video, Code)</td>
+                      <td className="p-4 text-sm">Native (Text, Image, Audio)</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-bold text-sm">Video Processing</td>
+                      <td className="p-4 text-sm font-semibold text-green-500">Full Video & Audio reasoning</td>
+                      <td className="p-4 text-sm text-muted-foreground">Frame sampling</td>
+                    </tr>
+                    <tr>
+                      <td className="p-4 font-bold text-sm">Ecosystem Integration</td>
+                      <td className="p-4 text-sm">Google Cloud, Vertex AI, Google Workspace</td>
+                      <td className="p-4 text-sm">Microsoft Azure</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 12:
+        return (
+          <Slide>
+            <SlideTitle>Simple Gemini Chatbot Example</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center h-full">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-primary">Live Chat Assistant</h3>
+                  <p className="text-xl text-muted-foreground">
+                    This interactive demo showcases a streaming conversation loop. In production, this connects to Next.js API routes streaming tokens directly from the Gemini API.
+                  </p>
+                </div>
+                <AIChatBot />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+
+      // PART 3 - REAL-WORLD LLM APP ARCHITECTURE
+      case 13:
+        return (
+          <Slide>
+            <SlideTitle>Frontend → Backend → LLM API Flow</SlideTitle>
+            <SlideContent>
+              <div className="flex flex-col items-center justify-center h-full space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl items-center">
+                  <div className="p-8 bg-card border rounded-3xl space-y-4 text-center relative group shadow">
+                    <MonitorSmartphone className="h-12 w-12 text-blue-500 mx-auto" />
+                    <h3 className="font-bold text-xl">1. React / Next.js UI</h3>
+                    <p className="text-xs text-muted-foreground">User submits prompt. UI manages loading state and renders streaming markdown.</p>
+                    <ArrowRight className="absolute -right-6 top-1/2 -translate-y-1/2 h-8 w-8 text-primary hidden md:block" />
+                  </div>
+                  <div className="p-8 bg-primary/10 border border-primary rounded-3xl space-y-4 text-center relative group shadow-lg shadow-primary/10">
+                    <Server className="h-12 w-12 text-primary mx-auto" />
+                    <h3 className="font-bold text-xl">2. FastAPI Backend</h3>
+                    <p className="text-xs text-muted-foreground">Handles auth, rate limiting, RAG retrieval, and prompt augmentation.</p>
+                    <ArrowRight className="absolute -right-6 top-1/2 -translate-y-1/2 h-8 w-8 text-primary hidden md:block" />
+                  </div>
+                  <div className="p-8 bg-card border rounded-3xl space-y-4 text-center relative group shadow">
+                    <Cpu className="h-12 w-12 text-yellow-500 mx-auto" />
+                    <h3 className="font-bold text-xl">3. Gemini API</h3>
+                    <p className="text-xs text-muted-foreground">Processes prompt and streams tokens back to backend via Server-Sent Events.</p>
+                  </div>
+                </div>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 14:
+        return (
+          <Slide>
+            <SlideTitle>Role of FastAPI Backend</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-primary">Why Decouple Frontend from AI?</h3>
+                  <p className="text-xl text-muted-foreground">
+                    While Next.js API routes are great, production enterprise AI apps often pair React with a dedicated Python backend like <strong>FastAPI</strong>.
+                  </p>
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-green-500 h-6 w-6 shrink-0" /> <span>Python AI Ecosystem (LangChain, LlamaIndex, native SDKs)</span></li>
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-green-500 h-6 w-6 shrink-0" /> <span>High-performance asynchronous execution</span></li>
+                    <li className="flex items-center gap-3"><CheckCircle2 className="text-green-500 h-6 w-6 shrink-0" /> <span>Heavy background tasks (PDF parsing, ETL pipelines)</span></li>
+                  </ul>
+                </div>
+                <CodeBlock 
+                  language="python"
+                  code={`
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from google import genai
+
+app = FastAPI()
+ai = genai.Client()
+
+@app.post("/generate")
+async def generate(prompt: str):
+    response = ai.models.generate_content_stream(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+    return StreamingResponse(
+        (chunk.text for chunk in response), 
+        media_type="text/event-stream"
+    )
+                  `}
+                />
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 15:
+        return (
+          <Slide>
+            <SlideTitle>Databases & Vector DBs in Production</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6 space-y-4">
+                    <Database className="h-8 w-8 text-blue-500" />
+                    <h3 className="font-bold text-lg">Relational (PostgreSQL)</h3>
+                    <p className="text-sm text-muted-foreground">Stores user accounts, payment history, chat session IDs, and structured metadata.</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6 space-y-4">
+                    <Layers className="h-8 w-8 text-purple-500" />
+                    <h3 className="font-bold text-lg">Vector DBs (Pinecone / Qdrant)</h3>
+                    <p className="text-sm text-muted-foreground">Stores high-dimensional document embeddings for sub-second semantic RAG retrieval.</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6 space-y-4">
+                    <History className="h-8 w-8 text-orange-500" />
+                    <h3 className="font-bold text-lg">Caching (Redis)</h3>
+                    <p className="text-sm text-muted-foreground">Caches identical LLM prompt responses to reduce API latency from 2s to 10ms and save API costs.</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 16:
+        return (
+          <Slide>
+            <SlideTitle>Deployment Basics</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                <Card className="bg-card border-border flex flex-col justify-between">
+                  <CardContent className="p-6 space-y-4">
+                    <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-xl">V</div>
+                    <h3 className="font-bold text-xl">Vercel / Next.js</h3>
+                    <p className="text-sm text-muted-foreground">Hosts the React frontend and edge API routes. Best for auto-scaling UI and instant CI/CD deployments.</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card border-border flex flex-col justify-between">
+                  <CardContent className="p-6 space-y-4">
+                    <Server className="h-12 w-12 text-primary" />
+                    <h3 className="font-bold text-xl">Google Cloud Run</h3>
+                    <p className="text-sm text-muted-foreground">Serverless container hosting for the FastAPI Python backend. Scales to zero, handles heavy AI workloads seamlessly.</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-card border-border flex flex-col justify-between">
+                  <CardContent className="p-6 space-y-4">
+                    <Binary className="h-12 w-12 text-green-500" />
+                    <h3 className="font-bold text-xl">Docker Containers</h3>
+                    <p className="text-sm text-muted-foreground">Packages the Python backend and system dependencies (PDF parsers, OCR tools) into reproducible artifacts.</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      case 17:
+        return (
+          <Slide>
+            <SlideTitle>Production AI Application Overview</SlideTitle>
+            <SlideContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 h-full items-center">
+                <div className="space-y-8">
+                  <h3 className="text-3xl font-bold tracking-tight">Summary: The Modern AI Stack</h3>
+                  <ul className="space-y-4">
+                    {[
+                      "Decouple UI (Next.js) from AI business logic (FastAPI).",
+                      "Leverage Gemini 1.5/2.5 for massive context windows & multimodal reasoning.",
+                      "Pair Vector DBs (RAG) with Redis caching for speed.",
+                      "Always implement Guardrails and secure API key management."
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-center gap-4 text-lg font-medium">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="h-5 w-5 text-primary" />
+                        </div>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="flex flex-col justify-center items-center text-center p-12 rounded-[3rem] bg-gradient-to-br from-yellow-500 to-primary text-white space-y-6 shadow-2xl">
+                  <Sparkles className="h-24 w-24 animate-bounce opacity-90" />
+                  <h3 className="text-4xl font-bold">You're Ready to Build.</h3>
+                  <p className="text-white/90 text-xl max-w-sm leading-relaxed">
+                    You have mastered the complete architecture required to build, scale, and deploy production-grade AI systems.
+                  </p>
+                </div>
+              </div>
+            </SlideContent>
+          </Slide>
+        )
+      default:
+        return null
+    }
+  }
+
+  if (viewMode === 'index') {
+    return <CurriculumIndex />
+  }
+
   return (
     <PresentationLayout>
-      {renderSlide()}
+      {currentTopicId === 'rag' ? renderRagSlide() : renderGeminiSlide()}
     </PresentationLayout>
   )
 }

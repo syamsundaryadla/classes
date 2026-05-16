@@ -1,11 +1,15 @@
 import { create } from 'zustand'
 
 interface PresentationState {
+  viewMode: 'index' | 'presentation'
+  currentTopicId: 'rag' | 'gemini'
   currentSlide: number
   totalSlides: number
   isSidebarOpen: boolean
   isPresenterMode: boolean
   direction: number // 1 for next, -1 for previous
+  setViewMode: (mode: 'index' | 'presentation') => void
+  setTopic: (topicId: 'rag' | 'gemini') => void
   setSlide: (index: number) => void
   nextSlide: () => void
   prevSlide: () => void
@@ -16,11 +20,15 @@ interface PresentationState {
 }
 
 export const usePresentationStore = create<PresentationState>((set) => ({
+  viewMode: 'index',
+  currentTopicId: 'rag',
   currentSlide: 0,
   totalSlides: 0,
   isSidebarOpen: false,
   isPresenterMode: false,
   direction: 0,
+  setViewMode: (mode) => set({ viewMode: mode }),
+  setTopic: (topicId) => set({ currentTopicId: topicId, currentSlide: 0 }),
   setSlide: (index) => set((state) => ({ 
     direction: index > state.currentSlide ? 1 : -1,
     currentSlide: index 

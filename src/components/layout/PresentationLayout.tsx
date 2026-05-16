@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { usePresentationStore } from '@/lib/store'
 import { AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Menu, Moon, Sun, Search, Maximize2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Menu, Moon, Sun, Search, Maximize2, Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTheme } from 'next-themes'
 import { Sidebar } from './Sidebar'
@@ -20,7 +20,9 @@ export const PresentationLayout = ({ children }: PresentationLayoutProps) => {
     nextSlide, 
     prevSlide, 
     toggleSidebar, 
-    direction
+    direction,
+    setViewMode,
+    currentTopicId
   } = usePresentationStore()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -50,8 +52,11 @@ export const PresentationLayout = ({ children }: PresentationLayoutProps) => {
           <Button variant="ghost" size="icon" onClick={toggleSidebar}>
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="font-bold text-xl tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
-            AI MASTERCLASS
+          <Button variant="outline" size="sm" onClick={() => setViewMode('index')} className="gap-2 border-primary/20 hover:bg-primary/10 text-primary font-bold">
+            <Home className="h-4 w-4" /> Curriculum Index
+          </Button>
+          <div className="font-bold text-xl tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 hidden md:block">
+            {currentTopicId === 'rag' ? 'RAG & AGENTIC AI MASTERCLASS' : 'LLM APIs & GEMINI ECOSYSTEM'}
           </div>
         </div>
 
